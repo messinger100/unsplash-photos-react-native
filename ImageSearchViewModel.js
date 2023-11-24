@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const apiUrl = 'https://api.unsplash.com/search/photos/';
 const ACCESS_KEY = "fEx0f6fugNGVNZ2AwARl7_wG8gr8zWAoIQkLUOpmEmE";
 
 const useImageSearch = () => {
@@ -9,16 +10,16 @@ const useImageSearch = () => {
 
   const fetchAPI = async (query) => {
     try {
-      const response = await axios.get(`https://api.unsplash.com/search/photos/?query=${query}&client_id=${ACCESS_KEY}`);
+      const queryString = `?query=${query}&client_id=${ACCESS_KEY}`;
+      const fullUrl = apiUrl + queryString;
+      const response = await axios.get(fullUrl);
       const imageData = response.data.results;
-
       const imageDetailsPromises = imageData.map(async (item) => {
-        const detailsResponse = await axios.get(`https://api.unsplash.com/photos/${item.id}?client_id=${ACCESS_KEY}`);
         return {
           id: item.id,
           url: item.urls.regular,
-          title: "Titulo: " + detailsResponse.data.alt_description || 'Sin título',
-          author: "Autor: " + detailsResponse.data.user.name || 'Autor desconocido',
+          title: "Titulo: " + item.alt_description || 'Sin título',
+          author: "Autor: " + item.user.name || 'Autor desconocido',
         };
       });
       const imageDetails = await Promise.all(imageDetailsPromises);
